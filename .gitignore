@@ -1,0 +1,11 @@
+.venv/
+node_modules/
+__pycache__/
+data/
+*.log
+.env
+.env.*
+!.env.example
+*.pyc
+.DS_Store
+Thumbs.db
