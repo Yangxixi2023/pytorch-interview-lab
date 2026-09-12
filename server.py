@@ -23,11 +23,23 @@ JOBS = {}
 LOCK = threading.Lock()
 
 
+def cancel_all_jobs():
+    with LOCK:
+        for job in JOBS.values():
+            if job['status'] == 'running':
+                job['cancelled'] = True
+                if job.get('process') is not None:
+                    job['process'].kill()
+
+
 def run_job(job, request):
     started = time.perf_counter()
     try:
         env = dict(os.environ, PYTHONIOENCODING='utf-8', OMP_NUM_THREADS='1')
-        process = subprocess.Popen([sys.executable, '-u', str(ROOT/'runner.py')], cwd=ROOT,
+        interpreter = Path(sys.executable)
+        if interpreter.name.lower() == 'pythonw.exe':
+            interpreter = interpreter.with_name('python.exe')
+        process = subprocess.Popen([str(interpreter), '-u', str(ROOT/'runner.py')], cwd=ROOT,
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, encoding='utf-8', env=env,
             creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
@@ -79,6 +91,14 @@ class Handler(BaseHTTPRequestHandler):
         if not self.valid_host():
             return self.respond({'error':'Invalid host'},403)
         path = urlparse(self.path).path
+        if path == '/api/state':
+            store = getattr(self.server, 'state_store', None)
+            if store is None:
+                return self.respond({'error':'仅桌面版使用此接口'},404)
+            try:
+                return self.respond(store.read())
+            except (ValueError, OSError) as exc:
+                return self.respond({'error':f'无法读取已保存进度：{exc}'},500)
         if path=='/api/problems':
             return self.respond([dict(id=p['id'],title=p['title'],category=p['category'],difficulty=p['difficulty'],gradient=p['gradient'],test_count=len(p['cases'])*3) for p in PROBLEMS.values()])
         if path=='/api/interview':
@@ -105,14 +125,18 @@ class Handler(BaseHTTPRequestHandler):
         if path not in files: return self.respond({'error':'Not found'},404)
         filename, mime=files[path]
         content=(ROOT/'web'/filename).read_bytes()
-        if filename=='index.html': content=content.replace(b'__TOKEN__',TOKEN.encode())
+        if filename=='index.html':
+            content=content.replace(b'__TOKEN__',TOKEN.encode())
+            desktop_mode = getattr(self.server, 'state_store', None) is not None
+            content=content.replace(b'__DESKTOP_MODE__',b'true' if desktop_mode else b'false')
         return self.respond(content,content_type=mime)
 
     def do_POST(self):
         try:
             length=int(self.headers.get('Content-Length',0))
-            if not 0<length<=200000:
-                return self.respond({'error':'请求大小需在 1–200000 字节之间'},400)
+            limit = 20000000 if urlparse(self.path).path == '/api/state' else 200000
+            if not 0<length<=limit:
+                return self.respond({'error':'请求大小超过允许范围'},400)
             raw=self.rfile.read(length)
         except ValueError:
             return self.respond({'error':'Content-Length 不正确'},400)
@@ -122,6 +146,15 @@ class Handler(BaseHTTPRequestHandler):
         if origin and origin not in {f'http://127.0.0.1:{self.server.server_port}',f'http://localhost:{self.server.server_port}'}:
             return self.respond({'error':'Invalid origin'},403)
         path=urlparse(self.path).path
+        if path == '/api/state':
+            store = getattr(self.server, 'state_store', None)
+            if store is None:
+                return self.respond({'error':'仅桌面版使用此接口'},404)
+            try:
+                saved = store.save(json.loads(raw))
+                return self.respond({'ok':saved},200 if saved else 409)
+            except (ValueError, OSError) as exc:
+                return self.respond({'error':str(exc)},400)
         if path.startswith('/api/cancel/'):
             with LOCK:
                 job=JOBS.get(path.rsplit('/',1)[-1])

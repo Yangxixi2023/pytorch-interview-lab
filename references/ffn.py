@@ -26,6 +26,7 @@ def solve(x, w1, b1, w2, b2):
     # 精确 GELU，不使用 tanh 近似。
     normal_cdf = 0.5 * (1.0 + torch.erf(hidden_features / math.sqrt(2.0)))
     activated_features = hidden_features * normal_cdf
+    # 下投影回到原 hidden size，便于外部模块做残差连接。
     output = activated_features @ w2 + b2
     return output
 

@@ -27,6 +27,7 @@ def solve(x, weight):
 
     quantized_weight = (weight / scale).round()
     quantized_weight = quantized_weight.clamp(-127, 127).to(torch.int8)
+    # 实際矩阵乘法使用反量化后的浮点权重，而不是直接乘 int8。
     reconstructed_weight = quantized_weight.to(x.dtype) * scale
     output = x @ reconstructed_weight.transpose(-2, -1)
     return output, quantized_weight, scale

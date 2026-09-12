@@ -19,6 +19,7 @@ def solve(z, edges):
     target_nodes = edges[1]
     source_embeddings = z[source_nodes]
     target_embeddings = z[target_nodes]
+    # 每条边独立计算端点内积，保留 edges 中的顺序和重复边。
     edge_logits = (source_embeddings * target_embeddings).sum(dim=-1)
     edge_probabilities = torch.sigmoid(edge_logits)
     return edge_probabilities

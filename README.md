@@ -8,6 +8,21 @@
 
 > 前端构建产物已包含在仓库中。日常使用只需 Python 依赖，不需要安装 Node.js，也不需要 GPU。代码在本机 CPU PyTorch 中执行，不发送到远程判题服务。
 
+## Windows 桌面版（直接双击使用）
+
+从 **[GitHub Releases](https://github.com/Yangxixi2023/pytorch-interview-lab/releases/latest)** 下载 `InterviewLab-Windows-x64.zip`，解压整个文件夹，双击 **手撕实验室.exe**。
+
+- 自带 Python 3.14、CPU PyTorch、NumPy、einops 和桌面窗口，不需要安装 Python 或手动启动服务。
+- 点窗口右上角 **X**，或菜单 **软件 → 退出**，会保存草稿并结束本软件的服务、判题及其子进程。
+- 草稿和进度存放在 `%LOCALAPPDATA%\PyTorchInterviewLab\progress.json`，不依赖临时端口；菜单 **进度** 可导入/导出备份。
+- 使用每显示器 DPI 缩放，中文使用微软雅黑 UI，代码使用 Consolas 并指定中文字体。
+- 请保持 exe、`app` 和 `runtime` 文件夹在一起，不要只复制 exe。
+- 如需额外的库，在软件目录执行 `runtime\python.exe -m pip install 库名`。
+
+旧浏览器版的记录可以点击页面右上角 **导出进度**，再在桌面版菜单 **进度 → 导入备份** 导入。
+
+源码模式仍可按下面的命令启动。构建桌面包使用 `python packaging/build_windows.py`；仅更新已有包用 `--skip-runtime`。`python packaging/verify_windows.py` 只进行离屏测试，不会弹出或激活窗口。
+
 ## 快速开始
 
 ### 环境要求
@@ -242,10 +257,10 @@ macOS/Linux 将解释器路径替换为 `.venv/bin/python`。普通 FFN、Entrop
 
 ```powershell
 # Windows：全部回归测试
-.venv/Scripts/python.exe -m unittest test_lab test_http -v
+.venv/Scripts/python.exe -m unittest test_lab test_http test_desktop_state -v
 ```
 
-macOS/Linux 使用 `.venv/bin/python -m unittest test_lab test_http -v`。测试包含题库参考实现、参数文档、错误实现检测、独立数学/算子对照、einops 提交与调试、中文输出、快照、真实 HTTP、主动停止和超时。超时用例会真实等待约30秒，整套通常需要数十秒。
+macOS/Linux 使用 `.venv/bin/python -m unittest test_lab test_http test_desktop_state -v`。测试包含题库参考实现、参数文档、错误实现检测、独立数学/算子对照、einops 提交与调试、中文输出、快照、真实 HTTP、主动停止和超时。超时用例会真实等待约30秒，整套通常需要数十秒。
 
 修改前端后：
 

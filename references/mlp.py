@@ -21,6 +21,7 @@ import torch
 def solve(x, gate_weight, up_weight, down_weight):
     gate_input = x @ gate_weight
     value_features = x @ up_weight
+    # gate 分支控制信息通过，up 分支携带值；两者逐元素相乘。
     activated_gate = gate_input * torch.sigmoid(gate_input)
     hidden_features = activated_gate * value_features
     output = hidden_features @ down_weight

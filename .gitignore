@@ -9,3 +9,6 @@ data/
 *.pyc
 .DS_Store
 Thumbs.db
+dist/
+build/
+.desktop-test/

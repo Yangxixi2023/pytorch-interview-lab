@@ -60,6 +60,7 @@ def solve(
         new_running_mean = running_mean
         new_running_var = running_var
 
+    # 推理时直接使用 running 统计，不再依赖当前 batch。
     normalized = (x - mean) * torch.rsqrt(variance + eps)
     output = normalized * weight + bias
     return output, new_running_mean, new_running_var

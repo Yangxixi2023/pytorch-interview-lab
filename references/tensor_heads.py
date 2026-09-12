@@ -24,6 +24,7 @@ def solve(x, heads):
     split = x.reshape(batch_size, sequence_length, heads, head_dim)
     split_heads = split.transpose(1, 2)  # [B,H,T,Dh]
 
+    # 合并前先交换回时间维；否则 reshape 会混淆 token 与 head。
     time_major_heads = split_heads.transpose(1, 2)
     merged = time_major_heads.reshape(
         batch_size, sequence_length, hidden_dim

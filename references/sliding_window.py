@@ -27,6 +27,7 @@ def solve(q, k, v, window=3):
 
     is_future = key_positions > query_positions
     is_too_old = key_positions < query_positions - window + 1
+    # 同时屏蔽未来和过旧的位置；window 包含当前位置。
     blocked_positions = is_future | is_too_old
 
     scores = (q @ k.transpose(-2, -1)) / math.sqrt(q.shape[-1])

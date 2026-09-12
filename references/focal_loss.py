@@ -18,6 +18,7 @@ import torch
 
 def solve(logits, targets, gamma=2.0):
     log_probabilities = logits.log_softmax(dim=-1)
+    # 只提取每个样本正确类别的概率，用它衡量样本难度。
     target_log_probabilities = log_probabilities.gather(1, targets[:, None])
     target_log_probabilities = target_log_probabilities.squeeze(-1)
     target_probabilities = target_log_probabilities.exp()

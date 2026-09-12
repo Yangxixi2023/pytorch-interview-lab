@@ -19,6 +19,7 @@ def solve(x, dim=-1):
     maximum = x.amax(dim=dim, keepdim=True)
     shifted_logits = x - maximum
     unnormalized_probabilities = torch.exp(shifted_logits)
+    # keepdim=True 保留归一化维度，后续除法才能正确广播。
     normalizer = unnormalized_probabilities.sum(dim=dim, keepdim=True)
     probabilities = unnormalized_probabilities / normalizer
     return probabilities

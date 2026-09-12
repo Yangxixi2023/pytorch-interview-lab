@@ -1,0 +1,23 @@
+手撕实验室 - Windows 64 位便携版
+
+1. 将整个文件夹解压到你希望的位置。
+2. 双击“手撕实验室.exe”。不需要安装 Python，不需要打开终端。
+3. 点击窗口右上角 X，或选择“软件 -> 退出”，即可退出。
+   窗口关闭后，本软件启动的服务和判题进程会一并结束。
+
+请保持 exe、app 和 runtime 文件夹在一起，不要只复制 exe。
+
+默认包含 Python、CPU PyTorch、NumPy、einops。
+89 道手撕题、全部参考代码及面试问答均可离线使用。
+点击论文链接时才会打开系统浏览器访问外网。
+
+进度自动保存在：
+%LOCALAPPDATA%\PyTorchInterviewLab\progress.json
+
+菜单“进度”可以导出、导入备份，以及打开数据文件夹。
+删除或更新软件目录不会主动删除这份进度。
+
+需要安装其他 Python 库时，可在软件目录打开 PowerShell：
+  .\runtime\python.exe -m pip install 库名
+
+本软件执行的是你自己的 Python 代码，不是用于运行陌生代码的安全沙箱。

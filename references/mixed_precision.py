@@ -27,6 +27,7 @@ def solve(param, scaled_grad, loss_scale, lr):
     if not torch.isfinite(gradient).all():
         return param.clone(), False
 
+    # 梯度有限才更新；返回布尔值让调用方知道本步是否真正执行。
     new_parameter = param - lr * gradient
     return new_parameter, True
 

@@ -26,6 +26,7 @@ def solve(q, k, v):
     expanded_key = k.repeat_interleave(queries_per_kv_head, dim=1)
     expanded_value = v.repeat_interleave(queries_per_kv_head, dim=1)
 
+    # 复制后的 KV 头数与 query 一致，注意力仍沿 key 序列维归一化。
     scores = q @ expanded_key.transpose(-2, -1)
     scores = scores / math.sqrt(q.shape[-1])
     attention_weights = torch.softmax(scores, dim=-1)

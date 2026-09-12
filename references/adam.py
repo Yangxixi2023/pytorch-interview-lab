@@ -43,6 +43,7 @@ def solve(
     corrected_first_moment = new_first_moment / (1.0 - beta1**step)
     corrected_second_moment = new_second_moment / (1.0 - beta2**step)
 
+    # epsilon 位于平方根之外，避免零梯度时分母为零。
     denominator = corrected_second_moment.sqrt() + eps
     parameter_update = lr * corrected_first_moment / denominator
     new_parameter = param - parameter_update

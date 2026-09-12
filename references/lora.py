@@ -26,6 +26,7 @@ def solve(x, weight, a, b, alpha):
     base_output = x @ weight.detach().transpose(-2, -1)
     low_rank_features = x @ a.transpose(-2, -1)
     low_rank_update = low_rank_features @ b.transpose(-2, -1)
+    # alpha/r 控制低秩分支强度，返回值同时包含冻结基座和可训练增量。
     output = base_output + (alpha / rank) * low_rank_update
     return output
 

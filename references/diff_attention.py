@@ -27,6 +27,7 @@ def solve(q1, k1, q2, k2, v, lam):
     scale = math.sqrt(q1.shape[-1])
     first_scores = (q1 @ k1.transpose(-2, -1)) / scale
     second_scores = (q2 @ k2.transpose(-2, -1)) / scale
+    # 两组分数各自归一化，再相减；不能先相减再做 softmax。
     first_weights = first_scores.softmax(dim=-1)
     second_weights = second_scores.softmax(dim=-1)
 

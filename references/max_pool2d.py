@@ -21,6 +21,7 @@ def solve(x, kernel_size, stride):
     windows = x.unfold(dimension=2, size=kernel_size, step=stride)
     windows = windows.unfold(dimension=3, size=kernel_size, step=stride)
     flattened_windows = windows.flatten(start_dim=-2)
+    # 只在每个窗口内部取最大值，不跨通道或相邻窗口求最大。
     output = flattened_windows.max(dim=-1).values
     return output
 

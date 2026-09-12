@@ -17,6 +17,7 @@ import torch
 
 
 def solve(param_shards, rank_grads, lr):
+    # 模拟跨 rank 的梯度平均，然后按参数分片长度切回各 rank。
     mean_gradient = torch.stack(rank_grads, dim=0).mean(dim=0)
     updated_shards = []
     offset = 0

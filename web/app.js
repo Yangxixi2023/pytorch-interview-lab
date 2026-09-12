@@ -11,13 +11,44 @@ import {tags} from '@lezer/highlight';
 const $=s=>document.querySelector(s);
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const token=$('meta[name="lab-token"]').content;
+const desktopMode=$('meta[name="desktop-mode"]').content==='true';
 let state;
-try{state=JSON.parse(localStorage.getItem('interview-lab')||'{}')}catch{state={}}
+if(desktopMode){
+  const response=await fetch('/api/state');
+  const data=await response.json();
+  if(!response.ok){document.body.textContent=data.error;throw Error(data.error)}
+  state=data;
+}else{
+  try{state=JSON.parse(localStorage.getItem('interview-lab')||'{}')}catch{state={}}
+}
+window.interviewLabExport=()=>JSON.stringify(state);
+
 state.drafts??={};state.solved??={};state.history??={};state.times??={};state.debug??={};
 let problems=[],current=null,editor,category='全部',difficulty='全部',docTab='statement',consoleTab='result',result=null,jobId=null,paused=false,loadingCode=false,lastTick=Date.now(),openGeneration=0;
 const themeSlot=new Compartment();
 let study;
-const save=()=>{try{localStorage.setItem('interview-lab',JSON.stringify(state));$('#saved').textContent='已保存'}catch{$('#saved').textContent='保存失败';toast('浏览器存储已满，请下载代码备份')}};
+let saveTimer;
+let saveQueue=Promise.resolve();
+const save=()=>{
+  if(desktopMode){
+    $('#saved').textContent='保存中';
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(()=>{
+      saveQueue=saveQueue.then(()=>api('/api/state',state)).then(()=>{$('#saved').textContent='已保存'}).catch(error=>{$('#saved').textContent='保存失败';toast(error.message)});
+    },350);
+  }else{
+    try{localStorage.setItem('interview-lab',JSON.stringify(state));$('#saved').textContent='已保存'}catch{$('#saved').textContent='保存失败';toast('浏览器存储已满，请下载代码备份')}
+  }
+};
+
+window.interviewLabImport=async data=>{
+  clearTimeout(saveTimer);
+  await saveQueue;
+  state=data;
+  await api('/api/state',state);
+  location.reload();
+};
+
 function toast(message){$('#toast').textContent=message;$('#toast').hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('#toast').hidden=true,4000)}
 async function api(path,body){const response=await fetch(path,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json','X-Lab-Token':token},body:JSON.stringify(body)});const data=await response.json();if(!response.ok)throw Error(data.error||response.statusText);return data}
 const badge=d=>`<span class="badge ${{'简单':'easy','中等':'medium','困难':'hard'}[d]}">${d}</span>`;
@@ -26,7 +57,7 @@ const timeString=sec=>`${Math.floor(sec/60).toString().padStart(2,'0')}:${Math.f
 function filters(){const categories=['全部',...new Set(problems.map(p=>p.category))];$('#categories').innerHTML=categories.map(c=>`<button class="filter ${c===category?'active':''}" data-category="${escape(c)}">${escape(c)}<span>${problems.filter(p=>c==='全部'||p.category===c).length}</span></button>`).join('');$('#difficulties').innerHTML=['全部','简单','中等','困难'].map(d=>`<button class="filter ${d===difficulty?'active':''}" data-difficulty="${d}">${d==='全部'?'全部难度':d}<span>${problems.filter(p=>d==='全部'||p.difficulty===d).length}</span></button>`).join('');}
 function renderBank(){filters();const term=$('#search').value.toLowerCase().trim(),filter=$('#status-filter').value;const rows=problems.filter(p=>(category==='全部'||p.category===category)&&(difficulty==='全部'||p.difficulty===difficulty)&&(filter==='all'||status(p.id)===filter)&&`${p.title} ${p.id} ${p.category}`.toLowerCase().includes(term));$('#count').textContent=`${rows.length} 道题`;$('#problem-list').innerHTML=rows.map(p=>`<tr data-problem="${p.id}"><td>${String(problems.indexOf(p)+1).padStart(3,'0')}</td><td><button class="problem-link">${escape(p.title)}</button><div class="file">${p.id}.py</div></td><td class="category-cell">${escape(p.category)}</td><td>${badge(p.difficulty)}</td><td><span class="status ${status(p.id)}">${{new:'未开始',draft:'练习中',solved:'✓ 已通过'}[status(p.id)]}</span></td><td class="file">${state.times[p.id]?timeString(state.times[p.id]):'—'}</td></tr>`).join('');$('#empty').hidden=rows.length>0;$('#progress').textContent=`${Object.keys(state.solved).length} / ${problems.length} 已完成`}
 function setView(work){$('#library').hidden=true;$('#reference-nav').classList.remove('active');$('#interview-nav').classList.remove('active');$('#bank').hidden=work;$('#workspace').hidden=!work;$('#bank-nav').classList.toggle('active',!work);$('#practice-nav').classList.toggle('active',work);if(!work)renderBank();lastTick=Date.now();editor?.requestMeasure()}
-function editorTheme(){const dark=state.theme==='dark';return [EditorView.theme({'&':{color:dark?'#dce5f4':'#253047',backgroundColor:dark?'#142031':'#fff'},'.cm-gutters':{backgroundColor:dark?'#142031':'#fafbfd',color:'#7f8ea3',borderRight:'1px solid '+(dark?'#29394d':'#edf0f5')},'.cm-activeLine':{backgroundColor:dark?'#203044':'#f5f8ff'},'.cm-activeLineGutter':{backgroundColor:dark?'#203044':'#edf3ff'},'.cm-cursor':{borderLeftColor:dark?'#b7d4ff':'#2563eb'},'.cm-selectionBackground':{backgroundColor:dark?'#375679 !important':'#cfe0ff !important'}},{dark}),syntaxHighlighting(HighlightStyle.define([{tag:tags.keyword,color:dark?'#c8a6ff':'#7c3aad'},{tag:tags.string,color:dark?'#9dd5a0':'#247344'},{tag:tags.comment,color:dark?'#90a3bd':'#738297'},{tag:[tags.number,tags.bool],color:dark?'#ffc18c':'#9b4c12'},{tag:tags.definition(tags.variableName),color:dark?'#8fc9ff':'#1f5791'}]))]}
+function editorTheme(){const dark=state.theme==='dark';return [EditorView.theme({'&':{color:dark?'#dce5f4':'#253047',backgroundColor:dark?'#142031':'#fff'},'.cm-gutters':{backgroundColor:dark?'#142031':'#fafbfd',color:'#7f8ea3',borderRight:'1px solid '+(dark?'#29394d':'#edf0f5')},'.cm-activeLine':{backgroundColor:dark?'#203044':'#f5f8ff'},'.cm-activeLineGutter':{backgroundColor:dark?'#203044':'#edf3ff'},'.cm-cursor':{borderLeftColor:dark?'#b7d4ff':'#2563eb'},'.cm-selectionBackground':{backgroundColor:dark?'#375679 !important':'#cfe0ff !important'}},{dark}),syntaxHighlighting(HighlightStyle.define([{tag:tags.keyword,color:dark?'#c8a6ff':'#7c3aad'},{tag:tags.string,color:dark?'#9dd5a0':'#247344'},{tag:tags.comment,color:dark?'#aabdd5':'#53647b'},{tag:[tags.number,tags.bool],color:dark?'#ffc18c':'#9b4c12'},{tag:tags.definition(tags.variableName),color:dark?'#8fc9ff':'#1f5791'}]))]}
 function makeState(code){return EditorState.create({doc:code,extensions:[basicSetup,python(),EditorView.contentAttributes.of({'aria-label':'Python 代码编辑器'}),themeSlot.of(editorTheme()),EditorView.lineWrapping,keymap.of([indentWithTab,{key:'Mod-Enter',run:()=>{run('run');return true}},{key:'Mod-Shift-Enter',run:()=>{run('submit');return true}},{key:'Mod-s',run:()=>{save();toast('代码已保存');return true}}]),EditorView.updateListener.of(update=>{if(update.docChanged&&current&&!loadingCode){state.drafts[current.id]=update.state.doc.toString();save()}})]})}
 async function openProblem(id){if(jobId){toast('请先等待当前运行结束或停止运行');return}const generation=++openGeneration;try{const p=await api('/api/problem/'+id);if(generation!==openGeneration)return;current=p;state.last=id;save();result=null;docTab='statement';consoleTab='result';paused=false;$('#pause').textContent='暂停计时';loadingCode=true;if(!editor)editor=new EditorView({state:makeState(state.drafts[id]??p.starter),parent:$('#editor')});else editor.setState(makeState(state.drafts[id]??p.starter));loadingCode=false;$('#filename').textContent=id+'.py';$('#current-title').textContent=p.title;$('#timer').textContent=timeString(state.times[id]||0);$('#run-status').textContent='等待运行';$('#breakpoints').value='';setView(true);renderDoc();renderConsole();location.hash=id;}catch(e){toast(e.message)}}
 function renderDoc(){document.querySelectorAll('[data-doc]').forEach(b=>b.classList.toggle('selected',b.dataset.doc===docTab));const p=current;if(!p)return;let html='';if(docTab==='statement'){html=problemView(p,badge);}else if(docTab==='cases'){html=casesView(p);}else{html='<h2>提交记录</h2>'+(state.history[p.id]||[]).map((h,i)=>`<div class="history-row"><span class="${h.passed?'success':'failure'}">${h.passed?'✓ 通过':'× 未通过'}</span> · ${escape(new Date(h.date).toLocaleString())}<div class="muted">${h.count} 个测试 · ${h.elapsed} 秒</div><button data-restore="${i}">恢复这次代码</button></div>`).join('');if(!state.history[p.id]?.length)html+='<p class="muted">还没有提交记录。运行示例不会计为提交。</p>';}$('#document').innerHTML=html}
@@ -51,5 +82,15 @@ $('#divider').onpointerdown=e=>{e.target.setPointerCapture(e.pointerId);const mo
 $('#divider').onkeydown=e=>{if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();const grid=$('.work-grid'),old=parseFloat(grid.style.getPropertyValue('--left-width'))||40;grid.style.setProperty('--left-width',Math.max(25,Math.min(65,old+(e.key==='ArrowLeft'?-2:2)))+'%')}};
 setInterval(()=>{const now=Date.now();if(current&&!$('#workspace').hidden&&!paused&&!document.hidden){state.times[current.id]=(state.times[current.id]||0)+(now-lastTick)/1000;$('#timer').textContent=timeString(state.times[current.id])}lastTick=now},1000);setInterval(save,10000);window.addEventListener('beforeunload',save);
 window.addEventListener('hashchange',()=>{const id=location.hash.slice(1);if(study?.route(id))return;if(!id){setView(false);return}if(current?.id===id){setView(true);return}if(problems.some(p=>p.id===id))openProblem(id)});
+if(!desktopMode){
+  const exportButton=document.createElement('button');
+  exportButton.textContent='导出进度';
+  exportButton.title='保存备份或迁移到桌面版';
+  exportButton.onclick=()=>{
+    const url=URL.createObjectURL(new Blob([JSON.stringify(state)],{type:'application/json'}));
+    const link=document.createElement('a');link.href=url;link.download='手撕实验室进度.json';link.click();URL.revokeObjectURL(url);
+  };
+  $('.header-right').prepend(exportButton);
+}
 document.body.classList.toggle('dark',state.theme==='dark');
 try{problems=await api('/api/problems');renderBank();study=initStudy({api,problems,openProblem,showMain:setView,toast});const id=location.hash.slice(1);if(study.route(id)){}else if(problems.some(p=>p.id===id))await openProblem(id)}catch(e){toast('题库加载失败：'+e.message)}
