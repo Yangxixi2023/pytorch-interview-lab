@@ -62,7 +62,7 @@ class LabTests(unittest.TestCase):
             'dapo_loss':PROBLEMS['grpo_loss']['reference'],
             'rmsnorm':'import torch\ndef solve(x,weight,eps=1e-6):\n return (x*torch.rsqrt(x.square().mean(-1,keepdim=True)+eps)*weight).detach()',
             'softmax':'import torch\ndef solve(x,dim=-1):\n return x.exp()/x.exp().sum(dim,keepdim=True)',
-            'gae_advantage':PROBLEMS['gae_advantage']['reference'].replace('live=(~terminated[t]).to(rewards.dtype)','live=torch.ones_like(rewards[t])'),
+            'gae_advantage':PROBLEMS['gae_advantage']['reference'].replace('continues = (~terminated[time]).to(rewards.dtype)','continues = torch.ones_like(rewards[time])'),
         }
         for slug,code in mutations.items():
             with self.subTest(problem=slug):

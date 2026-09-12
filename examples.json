@@ -68,7 +68,7 @@
         "advantages": "tensor([ 1., -1.])",
         "mask": "tensor([[ True, False, False],\n        [ True,  True,  True]])"
       },
-      "expected": "tensor(0.6122, grad_fn=<NegBackward0>)"
+      "expected": "tensor(0.6122, grad_fn=<DivBackward0>)"
     },
     {
       "arguments": {
@@ -79,7 +79,7 @@
         "clip_low": "0.1",
         "clip_high": "0.4"
       },
-      "expected": "tensor(0.3947, grad_fn=<NegBackward0>)"
+      "expected": "tensor(0.3947, grad_fn=<DivBackward0>)"
     },
     {
       "arguments": {
@@ -88,7 +88,7 @@
         "advantages": "tensor([ 1., -1.], requires_grad=True)",
         "mask": "tensor([[ True,  True, False],\n        [ True,  True,  True]])"
       },
-      "expected": "tensor(0.2166, grad_fn=<NegBackward0>)"
+      "expected": "tensor(0.2166, grad_fn=<DivBackward0>)"
     }
   ],
   "grpo_loss": [
@@ -130,7 +130,7 @@
         "ref_chosen": "tensor([ 0.1534, -2.6631, -1.4311, -0.5483,  0.3232],\n       requires_grad=True)",
         "ref_rejected": "tensor([-0.4780,  1.5618, -0.1298, -0.1335,  1.2740],\n       requires_grad=True)"
       },
-      "expected": "tensor(0.6348, grad_fn=<NegBackward0>)"
+      "expected": "tensor(0.6348, grad_fn=<MeanBackward0>)"
     },
     {
       "arguments": {
@@ -139,7 +139,7 @@
         "ref_chosen": "tensor([0., 0.])",
         "ref_rejected": "tensor([0., 0.])"
       },
-      "expected": "tensor(500., grad_fn=<NegBackward0>)"
+      "expected": "tensor(500., grad_fn=<MeanBackward0>)"
     }
   ],
   "gae_advantage": [
@@ -214,13 +214,13 @@
       "arguments": {
         "x": "tensor([[[-1.0462,  1.2305,  1.8662, -0.3435,  0.0675,  0.4481],\n         [-0.5986,  0.2515,  0.2113,  0.1331,  0.2522,  0.3827],\n         [ 0.2344,  1.1805,  0.7783,  1.2318,  0.0049,  0.1173]],\n\n        [[-1.1597,  0.6124, -1.3345,  1.2675,  0.9065,  0.1395],\n         [ 0.4733, -0.7066,  0.8822,  0.8555,  1.1304, -1.0084],\n         [-0.5964,  0.8119,  0.5169, -0.3748, -1.4017, -0.1650]]],\n       requires_grad=True)"
       },
-      "expected": "tensor([[[0.0000, 1.2305, 1.8662, 0.0000, 0.0675, 0.4481],\n         [0.0000, 0.2515, 0.2113, 0.1331, 0.2522, 0.3827],\n         [0.2344, 1.1805, 0.7783, 1.2318, 0.0049, 0.1173]],\n\n        [[0.0000, 0.6124, 0.0000, 1.2675, 0.9065, 0.1395],\n         [0.4733, 0.0000, 0.8822, 0.8555, 1.1304, 0.0000],\n         [0.0000, 0.8119, 0.5169, 0.0000, 0.0000, 0.0000]]],\n       grad_fn=<ClampMinBackward0>)"
+      "expected": "tensor([[[0.0000, 1.2305, 1.8662, 0.0000, 0.0675, 0.4481],\n         [0.0000, 0.2515, 0.2113, 0.1331, 0.2522, 0.3827],\n         [0.2344, 1.1805, 0.7783, 1.2318, 0.0049, 0.1173]],\n\n        [[0.0000, 0.6124, 0.0000, 1.2675, 0.9065, 0.1395],\n         [0.4733, 0.0000, 0.8822, 0.8555, 1.1304, 0.0000],\n         [0.0000, 0.8119, 0.5169, 0.0000, 0.0000, 0.0000]]],\n       grad_fn=<ClampBackward1>)"
     },
     {
       "arguments": {
         "x": "tensor([[-20.,  -1.,   1.,  20.]], requires_grad=True)"
       },
-      "expected": "tensor([[ 0.,  0.,  1., 20.]], grad_fn=<ClampMinBackward0>)"
+      "expected": "tensor([[ 0.,  0.,  1., 20.]], grad_fn=<ClampBackward1>)"
     }
   ],
   "gelu": [
@@ -518,7 +518,7 @@
         "targets": "tensor([0, 2, 3, 1])",
         "smoothing": "0.2"
       },
-      "expected": "tensor(2.1204, grad_fn=<SubBackward0>)"
+      "expected": "tensor(2.1204, grad_fn=<AddBackward0>)"
     },
     {
       "arguments": {
@@ -526,7 +526,7 @@
         "targets": "tensor([0, 2])",
         "smoothing": "0.0"
       },
-      "expected": "tensor(2.0196, grad_fn=<SubBackward0>)"
+      "expected": "tensor(2.0196, grad_fn=<AddBackward0>)"
     }
   ],
   "focal_loss": [

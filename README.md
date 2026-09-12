@@ -225,9 +225,9 @@ macOS/Linux 将解释器路径替换为 `.venv/bin/python`。普通 FFN、Entrop
 
 ## 面试问答
 
-点击顶栏 **面试问答**，按 **机器学习、预训练、后训练** 浏览36道知识问答。可以搜索关键词，先口述，再展开回答。每题都有：回答摘要、补充要点、面试追问、易错点、原始资料链接，部分题目还链接到相关代码练习。
+点击顶栏 **面试问答**，按 **机器学习、预训练、后训练** 浏览36道知识问答。可以搜索关键词。每题直接显示问题和一段完整回答，下方保留简短资料链接。
 
-这是根据原始论文和官方文档整理的知识题，不声称来自某家公司的真实面经。内容与追问由本项目重新组织，技术背景可通过链接核对。也可直接在 GitHub 阅读 **[面试问答文档](docs/INTERVIEW_QA.md)**。
+这是根据原始论文和官方文档整理的知识题，不声称来自某家公司的真实面经。回答由本项目重新组织，技术背景可通过链接核对。也可直接在 GitHub 阅读 **[面试问答文档](docs/INTERVIEW_QA.md)**。
 
 ## 进度保存
 
@@ -258,7 +258,7 @@ PowerShell 若阻止执行 `npm.ps1`，改用 `npm.cmd ci`、`npm.cmd run build`
 
 修改题意、输入输出或测试用例时：
 
-1. 在 `catalog*.py` 注册/修改题目，并在 `problem_io*.py` 写清每个输入和返回值。
+1. 在 `problem_bank.json` 修改题意、输入输出说明和测试场景，在 `references/<题目ID>.py` 维护完整参考实现。
 2. 使用本机 Python 执行 `generate_examples.py` 更新 `examples.json`，所有显示的期望输出都由参考代码计算。然后执行 `generate_docs.py` 更新全部参考文件和文档。
 3. 执行回归测试，更新 `docs/PROBLEMS.md` 和 README 中的数量。
 4. 若修改前端，一并提交更新后的 `web/bundle.js`。
@@ -267,12 +267,12 @@ PowerShell 若阻止执行 `npm.ps1`，改用 `npm.cmd ci`、`npm.cmd run build`
 | --- | --- |
 | `server.py` | 回环 HTTP 服务、异步任务、取消 |
 | `runner.py` | 测试运行、输出/梯度比较、自定义调试、快照 |
-| `catalog*.py` | 题意、模板、参考函数、测试场景 |
-| `problem_io*.py` | 参数类型、shape、含义、返回顺序与公式 |
+| `problem_bank.json` / `catalog.py` | 题意、输入输出、测试场景与加载器 |
+| `references/*.py` / `reference_code.py` | 人工维护的分步参考代码；网页和判题使用同一份实现 |
 | `generate_examples.py` / `examples.json` | 生成并保存题面示例 |
 | `test_lab.py` / `test_http.py` | 回归测试 |
 | `generate_docs.py` / `references/` | 全题库独立参考文件与文档导出 |
-| `interview_questions.py` | 带来源的面试问答 |
+| `interview_questions.json` | 问题、一段回答与来源链接 |
 | `requirements.txt` | Python 依赖 |
 | `package*.json` / `build.mjs` | 前端依赖及构建 |
 | `web/` | 页面、样式、编辑器和数学公式渲染 |

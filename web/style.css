@@ -266,17 +266,7 @@ dialog::backdrop { background: #16223480; }
 .qa-card { margin: 20px 0; border: 1px solid var(--border); border-radius: 8px; padding: 22px 24px; }
 .qa-meta { color: var(--muted); font: 12px Consolas, monospace; }
 .qa-card h2 { font-size: 19px; line-height: 1.7; margin: 8px 0 15px; }
-.qa-card summary { color: var(--accent); font-size: 14px; cursor: pointer; }
-.qa-answer { padding-top: 12px; font-size: 15px; line-height: 1.95; }
-.qa-answer h3 { font-size: 14px; margin: 16px 0 6px; }
-.qa-answer p { margin: 6px 0 14px; }
-.qa-answer ul { padding-left: 20px; }
-.qa-followup { border-left: 3px solid var(--accent); background: var(--bg); padding: 12px 16px; margin: 18px 0; font-size: 14px; }
-.qa-followup p { margin-bottom: 0; }
-.qa-pitfall { font-size: 14px; }
 .qa-sources { display: flex; gap: 12px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid var(--border); font-size: 12px; }
-.qa-practice { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
-.qa-practice button { font-size: 12px; }
 @media (max-width: 1000px) {
   #library { grid-template-columns: 225px minmax(0,1fr); }
   #library-content { padding: 25px; }
@@ -297,3 +287,5 @@ dialog::backdrop { background: #16223480; }
   .qa-card { padding: 18px; }
   .qa-card h2 { font-size: 17px; }
 }
+
+.qa-direct-answer { font-size: 16px; line-height: 1.95; margin: 12px 0 20px; }

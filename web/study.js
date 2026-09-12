@@ -24,7 +24,7 @@ export function initStudy({api,problems,openProblem,showMain,toast}) {
 
   function renderList() {
     if(mode==='interview') {
-      $('#library-menu').innerHTML='<div class="study-side-note">先口述，再展开答案。<br>每题包含要点、追问、易错点和原始资料。<br><br>按训练岗位知识体系整理，不标注未经核实的公司面经。</div>';
+      $('#library-menu').innerHTML='';
       renderQuestions();
       return;
     }
@@ -52,8 +52,8 @@ export function initStudy({api,problems,openProblem,showMain,toast}) {
   }
 
   function renderQuestions() {
-    const rows=questions.filter(q=>(category==='全部'||q.category===category)&&`${q.title} ${q.answer} ${q.points.join(' ')}`.toLowerCase().includes(filter.toLowerCase()));
-    $('#library-content').innerHTML=`<div class="study-heading"><p class="section-kicker">TRAINING INTERVIEW</p><h1>机器学习 · 预训练 · 后训练</h1><p>${rows.length} / ${questions.length} 道问答。回答按“结论 → 原理 → 边界”组织；先尝试回答，再展开核对。</p></div>${rows.map(q=>`<article class="qa-card"><div class="qa-meta">${q.id.toUpperCase()} · ${esc(q.category)}</div><h2>${esc(q.title)}</h2><details><summary>展开回答与追问</summary><div class="qa-answer"><h3>可以这样回答</h3><p>${esc(q.answer)}</p><h3>补充要点</h3><ul>${q.points.map(point=>`<li>${esc(point)}</li>`).join('')}</ul><div class="qa-followup"><strong>面试追问</strong><p>${esc(q.followup)}</p></div><p class="qa-pitfall"><strong>易错点：</strong>${esc(q.pitfall)}</p><div class="qa-sources">${q.sources.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noreferrer">${esc(s.title)} ↗</a>`).join('')}</div>${q.related.length?`<div class="qa-practice">${q.related.map(id=>`<button data-practice="${id}">练习 ${esc(problems.find(p=>p.id===id).title)} →</button>`).join('')}</div>`:''}</div></details></article>`).join('')}${!rows.length?'<p class="muted">没有匹配的问答。</p>':''}`;
+    const rows=questions.filter(q=>(category==='全部'||q.category===category)&&`${q.title} ${q.answer}`.toLowerCase().includes(filter.toLowerCase()));
+    $('#library-content').innerHTML=`<div class="study-heading"><h1>训练岗位面试问答</h1><p>${rows.length} / ${questions.length} 题</p></div>${rows.map(q=>`<article class="qa-card"><div class="qa-meta">${q.id.toUpperCase()} · ${esc(q.category)}</div><h2>${esc(q.title)}</h2><p class="qa-direct-answer">${esc(q.answer)}</p><div class="qa-sources">${q.sources.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noreferrer">${esc(s.title)} ↗</a>`).join('')}</div></article>`).join('')}${!rows.length?'<p class="muted">没有匹配的问答。</p>':''}`;
   }
 
   $('#library-search').oninput=e=>{filter=e.target.value;renderList()};
